@@ -25,3 +25,6 @@ artifacts/
 *.msi
 *.tar.gz
 *.zip
+.env
+.env.local
+.env.*.local
