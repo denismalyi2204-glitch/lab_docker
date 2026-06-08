@@ -1,494 +1,796 @@
-## Laboratory work VI
+# Лабораторная работа по работе с docker
+Работа посвящена изучению технологии работы с контейнерами
 
-Данная лабораторная работа посвещена изучению средств пакетирования на примере **CPack**
-
-## Report
-
-Задаём окружение
+Задаём пространство
 ```sh
-export GITHUB_USERNAME=<имя_пользователя>
-export GITHUB_EMAIL=<адрес_почтового_ящика>
-alias edit=nano
-alias gsed=sed
+$ export GITHUB_USERNAME=<имя_пользователя> 
+$ export GIST_TOKEN=<сохраненный_токен> 
+$ alias edit=<nano|vi|vim|subl>
 ```
 
-Клонируем и создаем репозиторий
-```sh
-cd ${GITHUB_USERNAME}/workspace
-pushd .
-source scripts/activate
-git clone https://github.com/${GITHUB_USERNAME}/lab05 projects/lab06
-cd projects/lab06
-git remote remove origin
-git remote add origin https://github.com/${GITHUB_USERNAME}/lab06
-```
-Вывод
-```sh
-Cloning into 'projects/lab06'...
-remote: Enumerating objects: 102, done.
-remote: Counting objects: 100% (102/102), done.
-remote: Compressing objects: 100% (53/53), done.
-remote: Total 102 (delta 26), reused 99 (delta 23), pack-reused 0 (from 0)
-Receiving objects: 100% (102/102), 341.51 KiB | 1.93 MiB/s, done.
-Resolving deltas: 100% (26/26), done
+```python
+$ git clone https://github.com/${GITHUB_USERNAME}/lab06 projects/lab_docker 
+$ cd projects/lab_docker 
+$ git remote remove origin 
+$ git remote add origin https://github.com/${GITHUB_USERNAME}/lab_docker
 ```
 
-
-Редактируем cmakelists.txt
 ```sh
-gsed -i '/project(print)/a\
-set(PRINT_VERSION_MAJOR 0)
-' CMakeLists.txt
-
-gsed -i '/project(print)/a\
-set(PRINT_VERSION_MINOR 1)
-' CMakeLists.txt
-
-gsed -i '/project(print)/a\
-set(PRINT_VERSION_PATCH 0)
-' CMakeLists.txt
-
-gsed -i '/project(print)/a\
-set(PRINT_VERSION_TWEAK 0)
-' CMakeLists.txt
-
-gsed -i '/project(print)/a\
-set(PRINT_VERSION\
-  \${PRINT_VERSION_MAJOR}.\${PRINT_VERSION_MINOR}.\${PRINT_VERSION_PATCH}.\${PRINT_VERSION_TWEAK})
-' CMakeLists.txt
-
-gsed -i '/project(print)/a\
-set(PRINT_VERSION_STRING "v\${PRINT_VERSION}")
-' CMakeLists.txt
+Cloning into 'projects/lab_docker'...
+remote: Enumerating objects: 202, done.
+remote: Counting objects: 100% (202/202), done.
+remote: Compressing objects: 100% (120/120), done.
+remote: Total 202 (delta 67), reused 177 (delta 45), pack-reused 0 (from 0)
+Receiving objects: 100% (202/202), 361.49 KiB | 1.20 MiB/s, done.
+Resolving deltas: 100% (67/67), done.
 ```
 
-
-Создаем описательные файлы
-```sh
-touch DESCRIPTION && edit DESCRIPTION   # добавить: "Print library for C++"
-touch ChangeLog.md
-export DATE="LANG=en_US date +'%a %b %d %Y'"
-cat > ChangeLog.md <<EOF
-* ${DATE} ${GITHUB_USERNAME} <${GITHUB_EMAIL}> 0.1.0.0
-- Initial release
-EOF
-```
-
-
-Конфигурация CPack — CPackConfig.cmake
-```sh
-cat > CPackConfig.cmake <<EOF
-include(InstallRequiredSystemLibraries)
-
-set(CPACK_PACKAGE_CONTACT ${GITHUB_EMAIL})
-set(CPACK_PACKAGE_VERSION_MAJOR \${PRINT_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR \${PRINT_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH \${PRINT_VERSION_PATCH})
-set(CPACK_PACKAGE_VERSION_TWEAK \${PRINT_VERSION_TWEAK})
-set(CPACK_PACKAGE_VERSION \${PRINT_VERSION})
-set(CPACK_PACKAGE_DESCRIPTION_FILE \${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTION)
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "static C++ library for printing")
-
-set(CPACK_RESOURCE_FILE_LICENSE \${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
-set(CPACK_RESOURCE_FILE_README \${CMAKE_CURRENT_SOURCE_DIR}/README.md)
-
-set(CPACK_RPM_PACKAGE_NAME "print-devel")
-set(CPACK_RPM_PACKAGE_LICENSE "MIT")
-set(CPACK_RPM_PACKAGE_GROUP "print")
-set(CPACK_RPM_CHANGELOG_FILE \${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog.md)
-set(CPACK_RPM_PACKAGE_RELEASE 1)
-
-set(CPACK_DEBIAN_PACKAGE_NAME "libprint-dev")
-set(CPACK_DEBIAN_PACKAGE_PREDEPENDS "cmake >= 3.0")
-set(CPACK_DEBIAN_PACKAGE_RELEASE 1)
-
-include(CPack)
-EOF
-```
-
-
-Подключение CPack в CMakeLists.txt
-```sh
-cat >> CMakeLists.txt <<EOF
-
-include(CPackConfig.cmake)
-EOF
-```
-
-
-Обновление README.md и фиксация
-```sh
-gsed -i 's/lab05/lab06/g' README.md
-git add .
-git commit -m "added cpack config"
-git tag v0.1.0.0
-git push origin master --tags
-```
-Вывод
-```sh
-On branch main
-nothing to commit, working tree clean
-fatal: tag 'v0.1.0.0' already exists
-Username for 'https://github.com': denismalyi2204-glitch
-Password for 'https://denismalyi2204-glitch@github.com': 
-Enumerating objects: 109, done.
-Counting objects: 100% (109/109), done.
-Delta compression using up to 4 threads
-Compressing objects: 100% (57/57), done.
-Writing objects: 100% (109/109), 342.80 KiB | 114.27 MiB/s, done.
-Total 109 (delta 29), reused 99 (delta 26), pack-reused 0
-remote: Resolving deltas: 100% (29/29), done.
-To https://github.com/denismalyi2204-glitch/lab06
- * [new branch]      main -> main
- * [new tag]         v0.1.0.0 -> v0.1.0.0
-```
-
-
-Создаем GitHub Actions workflow
-```sh
-mkdir -p .github/workflows
-```
-
-
-Создаём файл .github/workflows/cpack.yml
-```sh
-cat > .github/workflows/cpack.yml <<'EOF'
-name: CPack Package Build
-
-on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake build-essential
-    
-    - name: Configure CMake
-      run: cmake -H. -B_build -DCMAKE_BUILD_TYPE=Release
-    
-    - name: Build project
-      run: cmake --build _build
-    
-    - name: Create TGZ package
-      run: |
-        cd _build
-        cpack -G "TGZ"
-        cd ..
-    
-    - name: Create DEB package (optional)
-      run: |
-        cd _build
-        cpack -G "DEB" || echo "DEB generation skipped"
-        cd ..
-    
-    - name: Create RPM package (optional)
-      run: |
-        cd _build
-        cpack -G "RPM" || echo "RPM generation skipped (rpmbuild not installed)"
-        cd ..
-    
-    - name: List generated packages
-      run: ls -la _build/*.tar.gz _build/*.deb _build/*.rpm 2>/dev/null || true
-    
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: packages
-        path: |
-          _build/*.tar.gz
-          _build/*.deb
-          _build/*.rpm
-        if-no-files-found: warn
-EOF
-```
-
-
-Добавляем workflow в репозиторий
-```sh
-git add .github/workflows/cpack.yml
-git commit -m "add GitHub Actions workflow for CPack"
-git push origin master
-```
-Вывод
-```sh
-On branch main
-nothing to commit, working tree clean
-Username for 'https://github.com': denismalyi2204-glitch
-Password for 'https://denismalyi2204-glitch@github.com': 
-Enumerating objects: 8, done.
-Counting objects: 100% (8/8), done.
-Delta compression using up to 4 threads
-Compressing objects: 100% (4/4), done.
-Writing objects: 100% (5/5), 911 bytes | 911.00 KiB/s, done.
-Total 5 (delta 1), reused 0 (delta 0), pack-reused 0
-remote: Resolving deltas: 100% (1/1), completed with 1 local object.
-To https://github.com/denismalyi2204-glitch/lab06
-   e4beec7..0e5772b  main -> main
-```
-
-
-Собираем проект
-```sh
-cmake -H. -B_build
-cmake --build _build
-cd _build
-cpack -G "TGZ"
-cd ..
-mkdir -p artifacts
-mv _build/*.tar.gz artifacts/
-tree artifacts
-```
-Вывод
-```sh
--- Configuring done (0.0s)
--- Generating done (0.0s)
--- Build files have been written to: /home/ubumba64/denismalyi2204-glitch/workspace/projects/lab06/_build
-[ 33%] Built target print
-[ 66%] Built target example1
-[100%] Built target example2
-CPack: Create package using TGZ
-CPack: Install projects
-CPack: - Run preinstall target for: print
-CPack: - Install project: print []
-CPack: Create package
-CPack: - package: /home/ubumba64/denismalyi2204-glitch/workspace/projects/lab06/_build/print-0.1.1-Linux.tar.gz generated.
-artifacts
-└── print-0.1.1-Linux.tar.gz
-
-1 directory, 1 file
-```
-
-## Homework
-
-Устанавливаем RPM
+Скачиваем Docker
 ```sh
 sudo apt-get update
-sudo apt-get install -y rpm
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+docker --version
+docker compose version
 ```
 
-Собираем DEB и RPM пакеты
 ```sh
-cd ~/denismalyi2204-glitch/workspace/projects/lab06
-rm -rf _build
-mkdir _build && cd _build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cpack -G DEB
-cpack -G RPM
-ls -la *.deb *.rpm
-```
-Вывод
-```sh
--- Configuring done
--- Generating done
-CPack: Create package using DEB
-CPack: - package: /home/ubumba64/.../print-0.1.1-Linux.deb generated.
-
-CPack: Create package using RPM
-CPack: - package: /home/ubumba64/.../print-0.1.1-Linux.rpm generated.
-
--rw-rw-r-- 1 ubumba64 ubumba64  688 Apr 20 16:46 print-0.1.1-Linux.deb
--rw-rw-r-- 1 ubumba64 ubumba64 5857 Apr 20 16:46 print-0.1.1-Linux.rpm
-```
-
-
-Создаём cpack.yml для автоматической сборки пакетов
-```sh
-name: Build and Release Packages
-
-on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
-
-jobs:
-  build-packages:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            cpack_generators: "DEB;RPM;TGZ"
-            cpack_source_generators: "TGZ;ZIP"
-            deps: "cmake build-essential rpm"
-          
-          - os: macos-latest
-            cpack_generators: "DragNDrop;TGZ"
-            cpack_source_generators: "TGZ;ZIP"
-            deps: "cmake"
-          
-          - os: windows-latest
-            cpack_generators: "WIX;ZIP"
-            cpack_source_generators: "ZIP"
-            deps: "cmake"
-    
-    permissions:
-      contents: write
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    - name: Install dependencies (Linux)
-      if: runner.os == 'Linux'
-      run: sudo apt-get update && sudo apt-get install -y ${{ matrix.deps }}
-    
-    - name: Install dependencies (macOS)
-      if: runner.os == 'macOS'
-      run: brew install ${{ matrix.deps }}
-    
-    - name: Install dependencies (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
-        choco install wixtoolset -y
-    
-    - name: Configure CMake
-      run: cmake -B _build -S . -DCMAKE_BUILD_TYPE=Release
-    
-    - name: Build project
-      run: cmake --build _build --config Release
-    
-    - name: Create binary packages
-      run: |
-        cd _build
-        cpack -G "${{ matrix.cpack_generators }}" -C Release
-        cd ..
-    
-    - name: Create source packages
-      run: |
-        cd _build
-        cpack -G "${{ matrix.cpack_source_generators }}" --config CPackSourceConfig.cmake
-        cd ..
-    
-    - name: Upload to GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          _build/*.deb
-          _build/*.rpm
-          _build/*.dmg
-          _build/*.msi
-          _build/*.zip
-          _build/*.tar.gz
-        fail_on_unmatched_files: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+Hit:1 http://ru.archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://ru.archive.ubuntu.com/ubuntu noble-updates InRelease              
+Hit:3 http://ru.archive.ubuntu.com/ubuntu noble-backports InRelease            
+Hit:4 http://security.ubuntu.com/ubuntu noble-security InRelease               
+Hit:5 https://download.docker.com/linux/ubuntu noble InRelease             
+Get:6 https://cli.github.com/packages stable InRelease [3,917 B]
+Err:6 https://cli.github.com/packages stable InRelease
+  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 23F3D4EA75716059
+Reading package lists... Done
+W: GPG error: https://cli.github.com/packages stable InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 23F3D4EA75716059
+E: The repository 'https://cli.github.com/packages stable InRelease' is not signed.
+N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+docker-ce is already the newest version (5:29.5.3-1~ubuntu.24.04~noble).
+docker-ce-cli is already the newest version (5:29.5.3-1~ubuntu.24.04~noble).
+containerd.io is already the newest version (2.2.4-1~ubuntu.24.04~noble).
+docker-buildx-plugin is already the newest version (0.34.1-1~ubuntu.24.04~noble).
+docker-compose-plugin is already the newest version (5.1.4-1~ubuntu.24.04~noble).
+0 upgraded, 0 newly installed, 0 to remove and 246 not upgraded.
+Docker version 29.5.3, build d1c06ef
+Docker Compose version v5.1.4
 ```
 
-Коммитим изменения и создаём тег
+Создаём необходимые файлы
 ```sh
-cd ~/denismalyi2204-glitch/workspace/projects/lab06
+cat >> main.py <<EOF
+print("Hello, Docker!")
+EOF
+
+cat >> requirements.txt <<EOF
+flask
+requests
+EOF
+
+cat >> Dockerfile <<EOF
+FROM python:3.9-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    build-essential 
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python", "main.py"]
+EOF
+```
+
+Собираем образ и запускаем контейнер
+```sh
+docker build -t lab-docker .
+docker run --rm -it lab-docker
+```
+
+```sh
+[+] Building 46.4s (11/11) FINISHED                              docker:default
+ => [internal] load build definition from Dockerfile                       0.0s
+ => => transferring dockerfile: 250B                                       0.0s
+ => [internal] load metadata for docker.io/library/python:3.9-slim         0.0s
+ => [internal] load .dockerignore                                          0.0s
+ => => transferring context: 2B                                            0.0s
+ => CACHED [1/6] FROM docker.io/library/python:3.9-slim@sha256:2d97f6910b  0.1s
+ => => resolve docker.io/library/python:3.9-slim@sha256:2d97f6910b16bd338  0.1s
+ => [internal] load build context                                          0.0s
+ => => transferring context: 3.77kB                                        0.0s
+ => [2/6] WORKDIR /app                                                     0.1s
+ => [3/6] RUN apt-get update && apt-get install -y     build-essential    23.3s
+ => [4/6] COPY requirements.txt .                                          0.1s 
+ => [5/6] RUN pip install --no-cache-dir -r requirements.txt               4.5s 
+ => [6/6] COPY . .                                                         0.1s 
+ => exporting to image                                                    17.9s 
+ => => exporting layers                                                   13.1s 
+ => => exporting manifest sha256:9b4b728e65b4838524fe72d677e8a6257001b80b  0.0s 
+ => => exporting config sha256:0d0b2f2a935a901edce017d15df562bd363655096e  0.0s 
+ => => exporting attestation manifest sha256:88202a4546b1eea922ed98450c0c  0.0s 
+ => => exporting manifest list sha256:30b944ba9623a9102ff1fd3e6673699931f  0.0s
+ => => naming to docker.io/library/lab-docker:latest                       0.0s
+ => => unpacking to docker.io/library/lab-docker:latest                    4.7s
+Hello, Docker!
+```
+
+```sh
+# Просмотр образов
+docker images
+
+# Просмотр запущенных контейнеров
+docker ps
+
+# Просмотр всех контейнеров (включая остановленные)
+docker ps -a
+
+# Остановка контейнера
+docker stop <container_id>
+
+# Удаление контейнера
+docker rm <container_id>
+
+# Удаление образа
+docker rmi lab-docker
+```
+
+```sh
+                                                            i Info →   U  In Use
+IMAGE               ID             DISK USAGE   CONTENT SIZE   EXTRA
+lab-docker:latest   30b944ba9623        731MB          189MB        
+python:3.9-slim     2d97f6910b16        185MB         47.2MB        
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+bash: syntax error near unexpected token `newline'
+bash: syntax error near unexpected token `newline'
+Untagged: lab-docker:latest
+Deleted: sha256:30b944ba9623a9102ff1fd3e6673699931f29bd93864892e795fa096ad01db4f
+```
+
+Устанавливаем переменные и создаём файл docker-compose.yml
+```sh
+export DB_HOST=db
+export DB_USER=app_user
+export DB_PASSWORD=secure_password
+export DB_NAME=app_db
+export DB_ROOT_PASSWORD=root_password
+
+cat >> docker-compose.yml <<EOF
+version: '3.8'
+
+services:
+  app:
+    build: . 
+    container_name: lab_docker
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=\${DB_HOST}
+      - DB_USER=\${DB_USER}
+      - DB_PASSWORD=\${DB_PASSWORD}
+      - DB_NAME=\${DB_NAME}
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: \${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: \${DB_NAME}
+      MYSQL_USER: \${DB_USER}
+      MYSQL_PASSWORD: \${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
+EOF
+```
+
+```sh
+# Сборка и запуск всех сервисов
+docker compose up --build
+
+# Для запуска в фоновом режиме
+docker compose up -d --build
+
+# Просмотр логов
+docker compose logs
+
+# Просмотр статуса сервисов
+docker compose ps
+
+# Остановка сервисов
+docker compose down
+
+# Остановка с удалением томов (очистка данных БД)
+docker compose down -v
+```
+
+```sh
+WARN[0000] /home/ubumba64/projects/lab_docker/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] up 1/1
+ ✔ Image mysql:8.0 Pulled                                                             3.8s
+[+] Building 5.0s (13/13) FINISHED                                                        
+ => [internal] load local bake definitions                                           0.0s
+ => => reading from stdin 514B                                                       0.0s
+ => [internal] load build definition from Dockerfile                                 0.0s
+ => => transferring dockerfile: 250B                                                 0.0s
+ => [internal] load metadata for docker.io/library/python:3.9-slim                   0.0s
+ => [internal] load .dockerignore                                                    0.0s
+ => => transferring context: 2B                                                      0.0s
+ => [1/6] FROM docker.io/library/python:3.9-slim@sha256:2d97f6910b16bd338d3060f261f  0.0s
+ => => resolve docker.io/library/python:3.9-slim@sha256:2d97f6910b16bd338d3060f261f  0.0s
+ => [internal] load build context                                                    0.0s
+ => => transferring context: 4.55kB                                                  0.0s
+ => CACHED [2/6] WORKDIR /app                                                        0.0s
+ => CACHED [3/6] RUN apt-get update && apt-get install -y     build-essential        0.0s
+ => CACHED [4/6] COPY requirements.txt .                                             0.0s
+ => CACHED [5/6] RUN pip install --no-cache-dir -r requirements.txt                  0.0s
+ => [6/6] COPY . .                                                                   0.1s
+ => exporting to image                                                               4.5s
+ => => exporting layers                                                              0.1s
+ => => exporting manifest sha256:4888d8357c75197e435f449964c8205b6e76468b5a38a9b3c0  0.0s
+ => => exporting config sha256:63961ca8e26442a59be6bd2e4ca82c6fcc3f5d284ef9545424ee  0.0s
+ => => exporting attestation manifest sha256:f15f86302dea58733d4d3e2dd53b0d5f0c1a5c  0.0s
+ => => exporting manifest list sha256:f8966b24ec9b0186bd67c2770358913872d30bab0b454  0.0s
+ => => naming to docker.io/library/lab_docker-app:latest                             0.0s
+[+] up 6/6acking to docker.io/library/lab_docker-app:latest                          4.2s
+ ✔ Image mysql:8.0            Pulled                                                  3.8s
+ ✔ Image lab_docker-app       Built                                                   5.1s
+ ✔ Network lab_docker_default Created                                                 0.1s
+ ✔ Volume lab_docker_db_data  Created                                                 0.0s
+ ✔ Container mysql_db         Created                                                 1.1s
+ ✔ Container lab_docker       Created                                                 0.1s
+Attaching to lab_docker, mysql_db
+Container mysql_db Waiting 
+mysql_db  | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.46-1.el9 started.
+mysql_db  | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+mysql_db  | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.46-1.el9 started.
+mysql_db  | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Initializing database files
+mysql_db  | 2026-06-08T11:32:11.366476Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db  | 2026-06-08T11:32:11.366549Z 0 [System] [MY-013169] [Server] /usr/sbin/mysqld (mysqld 8.0.46) initializing of server in progress as process 80
+mysql_db  | 2026-06-08T11:32:11.389924Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db  | 2026-06-08T11:32:12.387942Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db  | 2026-06-08T11:32:13.952008Z 6 [Warning] [MY-010453] [Server] root@localhost is created with an empty password ! Please consider switching off the --initialize-insecure option.
+mysql_db  | 2026-06-08 11:32:17+00:00 [Note] [Entrypoint]: Database files initialized
+mysql_db  | 2026-06-08 11:32:17+00:00 [Note] [Entrypoint]: Starting temporary server
+mysql_db  | 2026-06-08T11:32:18.375781Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db  | 2026-06-08T11:32:18.385578Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.46) starting as process 124
+mysql_db  | 2026-06-08T11:32:18.418082Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db  | 2026-06-08T11:32:18.825359Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db  | 2026-06-08T11:32:19.137841Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+mysql_db  | 2026-06-08T11:32:19.137930Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+mysql_db  | 2026-06-08T11:32:19.141953Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+mysql_db  | 2026-06-08T11:32:19.169477Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.46'  socket: '/var/run/mysqld/mysqld.sock'  port: 0  MySQL Community Server - GPL.
+mysql_db  | 2026-06-08T11:32:19.169552Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Socket: /var/run/mysqld/mysqlx.sock
+mysql_db  | 2026-06-08 11:32:19+00:00 [Note] [Entrypoint]: Temporary server started.
+mysql_db  | '/var/lib/mysql/mysql.sock' -> '/var/run/mysqld/mysqld.sock'
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/iso3166.tab' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/leap-seconds.list' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/leapseconds' as time zone. Skipping it.
+Container mysql_db Healthy 
+lab_docker  | Hello, Docker!
+lab_docker exited with code 0
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/tzdata.zi' as time zone. Skipping it.
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/zone.tab' as time zone. Skipping it.
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/zone1970.tab' as time zone. Skipping it.
+mysql_db    | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Creating database mydb
+mysql_db    | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Creating user user
+mysql_db    | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Giving user user access to schema mydb
+mysql_db    | 
+mysql_db    | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Stopping temporary server
+mysql_db    | 2026-06-08T11:32:22.867442Z 14 [System] [MY-013172] [Server] Received SHUTDOWN from user root. Shutting down mysqld (Version: 8.0.46).
+mysql_db    | 2026-06-08T11:32:24.187671Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.0.46)  MySQL Community Server - GPL.
+mysql_db    | 2026-06-08 11:32:24+00:00 [Note] [Entrypoint]: Temporary server stopped
+mysql_db    | 
+mysql_db    | 2026-06-08 11:32:24+00:00 [Note] [Entrypoint]: MySQL init process done. Ready for start up.
+mysql_db    | 
+mysql_db    | 2026-06-08T11:32:25.209852Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db    | 2026-06-08T11:32:25.213219Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.46) starting as process 1
+mysql_db    | 2026-06-08T11:32:25.222357Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db    | 2026-06-08T11:32:25.439228Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db    | 2026-06-08T11:32:25.602583Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+mysql_db    | 2026-06-08T11:32:25.602659Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+mysql_db    | 2026-06-08T11:32:25.606307Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+mysql_db    | 2026-06-08T11:32:25.635585Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
+mysql_db    | 2026-06-08T11:32:25.635648Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.46'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+```
+
+```sh
+# Просмотр работающих контейнеров  
+docker ps  
+  
+# Просмотр логов  
+docker compose logs  
+  
+# Просмотр логов в реальном времени  
+docker compose logs -f  
+  
+# Остановка и удаление контейнеров  
+docker compose down  
+  
+# Остановка, удаление контейнеров и томов (данных БД)  
+docker compose down -v
+```
+
+```sh
+CONTAINER ID   IMAGE       COMMAND                  CREATED         STATUS                   PORTS                                                    NAMES
+ab4b346bb6bd   mysql:8.0   "docker-entrypoint.s…"   4 minutes ago   Up 4 minutes (healthy)   0.0.0.0:3306->3306/tcp, [::]:3306->3306/tcp, 33060/tcp   mysql_db
+WARN[0000] /home/ubumba64/projects/lab_docker/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+lab_docker  | Hello, Docker!
+mysql_db    | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.46-1.el9 started.
+mysql_db    | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+mysql_db    | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.46-1.el9 started.
+mysql_db    | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Initializing database files
+mysql_db    | 2026-06-08T11:32:11.366476Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db    | 2026-06-08T11:32:11.366549Z 0 [System] [MY-013169] [Server] /usr/sbin/mysqld (mysqld 8.0.46) initializing of server in progress as process 80
+mysql_db    | 2026-06-08T11:32:11.389924Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db    | 2026-06-08T11:32:12.387942Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db    | 2026-06-08T11:32:13.952008Z 6 [Warning] [MY-010453] [Server] root@localhost is created with an empty password ! Please consider switching off the --initialize-insecure option.
+mysql_db    | 2026-06-08 11:32:17+00:00 [Note] [Entrypoint]: Database files initialized
+mysql_db    | 2026-06-08 11:32:17+00:00 [Note] [Entrypoint]: Starting temporary server
+mysql_db    | 2026-06-08T11:32:18.375781Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db    | 2026-06-08T11:32:18.385578Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.46) starting as process 124
+mysql_db    | 2026-06-08T11:32:18.418082Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db    | 2026-06-08T11:32:18.825359Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db    | 2026-06-08T11:32:19.137841Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+mysql_db    | 2026-06-08T11:32:19.137930Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+mysql_db    | 2026-06-08T11:32:19.141953Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+mysql_db    | 2026-06-08T11:32:19.169477Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.46'  socket: '/var/run/mysqld/mysqld.sock'  port: 0  MySQL Community Server - GPL.
+mysql_db    | 2026-06-08T11:32:19.169552Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Socket: /var/run/mysqld/mysqlx.sock
+mysql_db    | 2026-06-08 11:32:19+00:00 [Note] [Entrypoint]: Temporary server started.
+mysql_db    | '/var/lib/mysql/mysql.sock' -> '/var/run/mysqld/mysqld.sock'
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/iso3166.tab' as time zone. Skipping it.
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/leap-seconds.list' as time zone. Skipping it.
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/leapseconds' as time zone. Skipping it.
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/tzdata.zi' as time zone. Skipping it.
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/zone.tab' as time zone. Skipping it.
+mysql_db    | Warning: Unable to load '/usr/share/zoneinfo/zone1970.tab' as time zone. Skipping it.
+mysql_db    | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Creating database mydb
+mysql_db    | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Creating user user
+mysql_db    | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Giving user user access to schema mydb
+mysql_db    | 
+mysql_db    | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Stopping temporary server
+mysql_db    | 2026-06-08T11:32:22.867442Z 14 [System] [MY-013172] [Server] Received SHUTDOWN from user root. Shutting down mysqld (Version: 8.0.46).
+mysql_db    | 2026-06-08T11:32:24.187671Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.0.46)  MySQL Community Server - GPL.
+mysql_db    | 2026-06-08 11:32:24+00:00 [Note] [Entrypoint]: Temporary server stopped
+mysql_db    | 
+mysql_db    | 2026-06-08 11:32:24+00:00 [Note] [Entrypoint]: MySQL init process done. Ready for start up.
+mysql_db    | 
+mysql_db    | 2026-06-08T11:32:25.209852Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db    | 2026-06-08T11:32:25.213219Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.46) starting as process 1
+mysql_db    | 2026-06-08T11:32:25.222357Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db    | 2026-06-08T11:32:25.439228Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db    | 2026-06-08T11:32:25.602583Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+mysql_db    | 2026-06-08T11:32:25.602659Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+mysql_db    | 2026-06-08T11:32:25.606307Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+mysql_db    | 2026-06-08T11:32:25.635585Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
+mysql_db    | 2026-06-08T11:32:25.635648Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.46'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+WARN[0000] /home/ubumba64/projects/lab_docker/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+mysql_db  | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.46-1.el9 started.
+mysql_db  | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+mysql_db  | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.46-1.el9 started.
+mysql_db  | 2026-06-08 11:32:11+00:00 [Note] [Entrypoint]: Initializing database files
+mysql_db  | 2026-06-08T11:32:11.366476Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db  | 2026-06-08T11:32:11.366549Z 0 [System] [MY-013169] [Server] /usr/sbin/mysqld (mysqld 8.0.46) initializing of server in progress as process 80
+mysql_db  | 2026-06-08T11:32:11.389924Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db  | 2026-06-08T11:32:12.387942Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db  | 2026-06-08T11:32:13.952008Z 6 [Warning] [MY-010453] [Server] root@localhost is created with an empty password ! Please consider switching off the --initialize-insecure option.
+mysql_db  | 2026-06-08 11:32:17+00:00 [Note] [Entrypoint]: Database files initialized
+mysql_db  | 2026-06-08 11:32:17+00:00 [Note] [Entrypoint]: Starting temporary server
+mysql_db  | 2026-06-08T11:32:18.375781Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db  | 2026-06-08T11:32:18.385578Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.46) starting as process 124
+mysql_db  | 2026-06-08T11:32:18.418082Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db  | 2026-06-08T11:32:18.825359Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db  | 2026-06-08T11:32:19.137841Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+mysql_db  | 2026-06-08T11:32:19.137930Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+mysql_db  | 2026-06-08T11:32:19.141953Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+mysql_db  | 2026-06-08T11:32:19.169477Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.46'  socket: '/var/run/mysqld/mysqld.sock'  port: 0  MySQL Community Server - GPL.
+mysql_db  | 2026-06-08T11:32:19.169552Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Socket: /var/run/mysqld/mysqlx.sock
+mysql_db  | 2026-06-08 11:32:19+00:00 [Note] [Entrypoint]: Temporary server started.
+mysql_db  | '/var/lib/mysql/mysql.sock' -> '/var/run/mysqld/mysqld.sock'
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/iso3166.tab' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/leap-seconds.list' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/leapseconds' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/tzdata.zi' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/zone.tab' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/zone1970.tab' as time zone. Skipping it.
+mysql_db  | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Creating database mydb
+mysql_db  | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Creating user user
+mysql_db  | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Giving user user access to schema mydb
+mysql_db  | 
+mysql_db  | 2026-06-08 11:32:22+00:00 [Note] [Entrypoint]: Stopping temporary server
+mysql_db  | 2026-06-08T11:32:22.867442Z 14 [System] [MY-013172] [Server] Received SHUTDOWN from user root. Shutting down mysqld (Version: 8.0.46).
+mysql_db  | 2026-06-08T11:32:24.187671Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.0.46)  MySQL Community Server - GPL.
+mysql_db  | 2026-06-08 11:32:24+00:00 [Note] [Entrypoint]: Temporary server stopped
+mysql_db  | 
+mysql_db  | 2026-06-08 11:32:24+00:00 [Note] [Entrypoint]: MySQL init process done. Ready for start up.
+mysql_db  | 
+mysql_db  | 2026-06-08T11:32:25.209852Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db  | 2026-06-08T11:32:25.213219Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.46) starting as process 1
+mysql_db  | 2026-06-08T11:32:25.222357Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db  | 2026-06-08T11:32:25.439228Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db  | 2026-06-08T11:32:25.602583Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+mysql_db  | 2026-06-08T11:32:25.602659Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+mysql_db  | 2026-06-08T11:32:25.606307Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+mysql_db  | 2026-06-08T11:32:25.635585Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
+mysql_db  | 2026-06-08T11:32:25.635648Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.46'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+lab_docker  | Hello, Docker!
+WARN[0000] /home/ubumba64/projects/lab_docker/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] down 3/3
+ ✔ Container lab_docker       Removed                                                 0.0s
+ ✔ Container mysql_db         Removed                                                 1.8s
+ ✔ Network lab_docker_default Removed                                                 0.1s
+WARN[0000] /home/ubumba64/projects/lab_docker/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] down 1/1
+ ✔ Volume lab_docker_db_data Removed                                                  0.0s
+```
+
+отправляем на гитхаб
+```sh
 git add .
-git commit -m "Prepare for release"
+git commit -m "Лабораторная работа по Docker"
 git push origin main
-git tag -a v1.0.0 -m "Release v1.0.0 - solver application packages"
-git push origin v1.0.0
 ```
-Вывод
 ```sh
-[main f83dbc5] Prepare for release
- 4 files changed, 37 insertions(+), 1 deletion(-)
- create mode 100644 artifacts/print-0.1.1-Linux.tar.gz
- delete mode 100644 artifacts/screenshot.png
- create mode 100755 check_lab06.sh
+Username for 'https://github.com': denismalyi2204-glitch
+Password for 'https://denismalyi2204-glitch@github.com': 
+Enumerating objects: 202, done.
+Counting objects: 100% (202/202), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (96/96), done.
+Writing objects: 100% (202/202), 361.43 KiB | 72.29 MiB/s, done.
+Total 202 (delta 68), reused 195 (delta 67), pack-reused 0
+remote: Resolving deltas: 100% (68/68), done.
+To https://github.com/denismalyi2204-glitch/lab_docker
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
 
-To https://github.com/denismalyi2204-glitch/lab06
- * [new tag]         v1.0.0 -> v1.0.0
-```
-
-Проверяем статус сборки
-```sh
-gh run list -R denismalyi2204-glitch/lab06 --limit 3
-```
-Вывод
-```sh
-STATUS  TITLE                WORKFLOW             BRANCH  EVENT  ID           ELAPSED  AGE
-*       Prepare for release  CPack Package Build  v1.0.0  push   24679173586  0s       less than a minute ago
-*       Prepare for release  CI                   v1.0.0  push   24679173584  0s       less than a minute ago
-*       Prepare for release  CI                   main    push   24679163325  12s      less than a minute ago
 ```
 
-Проверяем работу workflow
+# Homework
+
+## Часть 1
+Подготавливаем пространство
 ```sh
-gh run watch -R denismalyi2204-glitch/lab06
+cd ~
+git clone https://github.com/tp-lessons/lab_docker.git lab_docker_source
+cp -r lab_docker_source/app ~/projects/lab_docker/
+cp -r lab_docker_source/db ~/projects/lab_docker/
+cd ~/projects/lab_docker
+ls -la
 ```
-Вывод
+
 ```sh
-? Select a workflow run * Fix CPackConfig: remove duplicates, fix WIX license path, Build and Release Packages (v1.1.2) -12s ago
-✓ v1.1.2 Build and Release Packages · 27104256894
-Triggered via push about 1 minute ago
+Cloning into 'lab_docker_source'...
+remote: Enumerating objects: 16, done.
+remote: Counting objects: 100% (16/16), done.
+remote: Compressing objects: 100% (12/12), done.
+remote: Total 16 (delta 1), reused 13 (delta 1), pack-reused 0 (from 0)
+Receiving objects: 100% (16/16), 5.01 KiB | 1.67 MiB/s, done.
+Resolving deltas: 100% (1/1), done.
+total 136
+drwxrwxr-x 15 ubumba64 ubumba64  4096 Jun  8 11:52 .
+drwxrwxr-x  3 ubumba64 ubumba64  4096 Jun  8 10:53 ..
+drwxrwxr-x  3 ubumba64 ubumba64  4096 Jun  8 11:52 app
+-rw-rw-r--  1 ubumba64 ubumba64   161 Jun  8 10:53 ChangeLog.md
+-rwxrwxr-x  1 ubumba64 ubumba64  1094 Jun  8 10:53 check_lab06.sh
+-rw-rw-r--  1 ubumba64 ubumba64   601 Jun  8 10:53 CMakeLists.txt
+-rw-rw-r--  1 ubumba64 ubumba64  1677 Jun  8 10:53 CPackConfig.cmake
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 11:52 db
+-rw-rw-r--  1 ubumba64 ubumba64    66 Jun  8 10:53 DESCRIPTION
+-rw-rw-r--  1 ubumba64 ubumba64   724 Jun  8 11:06 docker-compose.yml
+-rw-rw-r--  1 ubumba64 ubumba64   211 Jun  8 10:54 Dockerfile
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 10:53 examples
+-rw-rw-r--  1 ubumba64 ubumba64     6 Jun  8 10:53 file.txt
+drwxrwxr-x  3 ubumba64 ubumba64  4096 Jun  8 10:53 formatter_ex_lib
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 10:53 formatter_lib
+drwxrwxr-x  8 ubumba64 ubumba64  4096 Jun  8 11:44 .git
+drwxrwxr-x  3 ubumba64 ubumba64  4096 Jun  8 10:53 .github
+-rw-rw-r--  1 ubumba64 ubumba64   194 Jun  8 10:53 .gitignore
+-rw-rw-r--  1 ubumba64 ubumba64   102 Jun  8 10:53 .gitmodules
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 10:53 hello_world_application
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 10:53 include
+-rw-rw-r--  1 ubumba64 ubumba64  1062 Jun  8 10:53 LICENSE
+-rw-rw-r--  1 ubumba64 ubumba64  1144 Jun  8 10:53 license.rtf
+-rw-rw-r--  1 ubumba64 ubumba64    24 Jun  8 10:54 main.py
+-rw-rw-r--  1 ubumba64 ubumba64  1044 Jun  8 10:53 main_solver.cpp
+-rw-rw-r--  1 ubumba64 ubumba64 14843 Jun  8 10:53 README.md
+-rw-rw-r--  1 ubumba64 ubumba64    15 Jun  8 10:54 requirements.txt
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 10:53 solver_application
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 10:53 solver_lib
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 10:53 sources
+drwxrwxr-x  2 ubumba64 ubumba64  4096 Jun  8 10:53 tests
 
-JOBS
-✓ build-packages (windows-latest, WIX;ZIP, ZIP, cmake) in 2m16s (ID 79990436933)
-  ✓ Set up job
-  ✓ Checkout code
-  - Install dependencies (Linux)
-  - Install dependencies (macOS)
-  ✓ Install dependencies (Windows)
-  ✓ Configure CMake
-  ✓ Build project
-  ✓ Create binary packages
-  ✓ Create source packages
-  ✓ Upload to GitHub Release
-  ✓ Post Checkout code
-  ✓ Complete job
-✓ build-packages (ubuntu-latest, DEB;RPM;TGZ, TGZ;ZIP, cmake build-essential rpm) in 27s (ID 79990436942)
-  ✓ Set up job
-  ✓ Checkout code
-  ✓ Install dependencies (Linux)
-  - Install dependencies (macOS)
-  - Install dependencies (Windows)
-  ✓ Configure CMake
-  ✓ Build project
-  ✓ Create binary packages
-  ✓ Create source packages
-  ✓ Upload to GitHub Release
-  ✓ Post Checkout code
-  ✓ Complete job
-✓ build-packages (macos-latest, DragNDrop;TGZ, TGZ;ZIP, cmake) in 29s (ID 79990436943)
-  ✓ Set up job
-  ✓ Checkout code
-  - Install dependencies (Linux)
-  ✓ Install dependencies (macOS)
-  - Install dependencies (Windows)
-  ✓ Configure CMake
-  ✓ Build project
-  ✓ Create binary packages
-  ✓ Create source packages
-  ✓ Upload to GitHub Release
-  ✓ Post Checkout code
-  ✓ Complete job
+```
 
-ANNOTATIONS
-! Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, softprops/action-gh-release@v2. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
-build-packages (ubuntu-latest, DEB;RPM;TGZ, TGZ;ZIP, cmake build-essential rpm): .github#2
+Создаём новый докер для веб
+```sh
+cat > Dockerfile << 'EOF'
+FROM python:3.9-slim
+WORKDIR /app
+# Копируем только requirements.txt из папки app/
+COPY app/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+# Копируем весь код приложения
+COPY app/ .
+# Открываем порт, который использует приложение (Flask по умолчанию 5000)
+EXPOSE 5000
+CMD ["python", "app.py"]
+EOF
+```
 
-! Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, softprops/action-gh-release@v2. Actions will be forced to run with Node.js 24 by default starting June 16th, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
-build-packages (macos-latest, DragNDrop;TGZ, TGZ;ZIP, cmake): .github#2
+```sh
+# Сборка образа с новым Dockerfile
+docker build -t lab-web-app .
 
-! cmake 4.3.2 is already installed and up-to-date.
-To reinstall 4.3.2, run:
-  brew reinstall cmake
+# Запуск контейнера в фоновом режиме с пробросом порта 5000
+docker run -d --name web_app_container -p 5000:5000 lab-web-app
 
-build-packages (macos-latest, DragNDrop;TGZ, TGZ;ZIP, cmake): .github#7
+# Проверяем что контейнер запустился
+docker ps
+```
 
+```sh
+[+] Building 16.4s (10/10) FINISHED                                               docker:default
+ => [internal] load build definition from Dockerfile                                        0.0s
+ => => transferring dockerfile: 458B                                                        0.0s
+ => [internal] load metadata for docker.io/library/python:3.9-slim                          0.0s
+ => [internal] load .dockerignore                                                           0.0s
+ => => transferring context: 2B                                                             0.0s
+ => [1/5] FROM docker.io/library/python:3.9-slim@sha256:2d97f6910b16bd338d3060f261f53f1449  0.1s
+ => => resolve docker.io/library/python:3.9-slim@sha256:2d97f6910b16bd338d3060f261f53f1449  0.1s
+ => [internal] load build context                                                           0.0s
+ => => transferring context: 1.76kB                                                         0.0s
+ => CACHED [2/5] WORKDIR /app                                                               0.0s
+ => [3/5] COPY app/requirements.txt .                                                       0.1s
+ => [4/5] RUN pip install --no-cache-dir -r requirements.txt                               11.5s
+ => [5/5] COPY app/ .                                                                       0.1s 
+ => exporting to image                                                                      4.3s 
+ => => exporting layers                                                                     3.2s 
+ => => exporting manifest sha256:429a16f2d1d5a5b5ffcbd085b5005845c52f8dac806963d98f4140444  0.0s 
+ => => exporting config sha256:656b695ae4d92298a8d51945ce662ef1c98eed7c10a25777743baaebd92  0.0s 
+ => => exporting attestation manifest sha256:556181075a723c8a9be3d17547d489b6edb16a98e8e0a  0.0s 
+ => => exporting manifest list sha256:c9c091b3b62f053b0d917950e6e4de72ad69a43452c28718a5b4  0.0s
+ => => naming to docker.io/library/lab-web-app:latest                                       0.0s
+ => => unpacking to docker.io/library/lab-web-app:latest                                    1.0s
+197ae4653232fb1da47195162a27c3627d18254b0e796147fb45c6556aac8c18
+CONTAINER ID   IMAGE         COMMAND           CREATED        STATUS                  PORTS                                         NAMES
+197ae4653232   lab-web-app   "python app.py"   1 second ago   Up Less than a second   0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp   web_app_container
 
-✓ Run Build and Release Packages (27104256894) completed with 'success'
+```
 
+Выполняем оставшиеся пункты домашнего задания
+```sh
+# 3. Копируем файл README.md в каталог /home/ контейнера
+docker cp README.md web_app_container:/home/
+
+# 4. Подключаемся к терминалу контейнера в интерактивном режиме
+docker exec -it web_app_container /bin/bash
+
+# Внутри контейнера проверяем, что файл скопирован:
+ls -la /home/
+```
+
+```sh
+root@197ae4653232:/app# ls -la /home/
+total 24
+drwxr-xr-x 1 root root  4096 Jun  8 11:56 .
+drwxr-xr-x 1 root root  4096 Jun  8 11:56 ..
+-rw-rw-r-- 1 1000 1000 14843 Jun  8 10:53 README.md
+```
+
+```sh
+# 6. Останавливаем контейнер
+docker stop web_app_container
+
+# Удаляем контейнер
+docker rm web_app_container
+```
+```sh
+web_app_container
+web_app_container
+```
+
+## Часть 2
+Удаляем и создаём новый докер для веб и sql
+```sh
+rm -f docker-compose.yml
+
+cat > docker-compose.yml << 'EOF'
+services:
+  web:
+    build: .
+    container_name: web_app
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+      MYSQL_DATABASE: mydb
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d   # Монтируем папку с init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
+EOF
+```
+
+```sh
+# Запуск (сборка образов и запуск контейнеров)
+docker compose up --build
+```
+
+```sh
+[+] Building 0.6s (12/12) FINISHED                                              
+ => [internal] load local bake definitions                                 0.0s
+ => => reading from stdin 514B                                             0.0s
+ => [internal] load build definition from Dockerfile                       0.0s
+ => => transferring dockerfile: 458B                                       0.0s
+ => [internal] load metadata for docker.io/library/python:3.9-slim         0.0s
+ => [internal] load .dockerignore                                          0.0s
+ => => transferring context: 2B                                            0.0s
+ => [1/5] FROM docker.io/library/python:3.9-slim@sha256:2d97f6910b16bd338  0.0s
+ => => resolve docker.io/library/python:3.9-slim@sha256:2d97f6910b16bd338  0.0s
+ => [internal] load build context                                          0.0s
+ => => transferring context: 204B                                          0.0s
+ => CACHED [2/5] WORKDIR /app                                              0.0s
+ => CACHED [3/5] COPY app/requirements.txt .                               0.0s
+ => CACHED [4/5] RUN pip install --no-cache-dir -r requirements.txt        0.0s
+ => CACHED [5/5] COPY app/ .                                               0.0s
+ => exporting to image                                                     0.2s
+ => => exporting layers                                                    0.0s
+ => => exporting manifest sha256:e7b8323f0e8d814445c37def3e8ee64fb9a9a828  0.0s
+ => => exporting config sha256:7ed7e7f1923eba268dd308b232145af4a4facd7b99  0.0s
+ => => exporting attestation manifest sha256:8173e59023fb7c7b0a482eecc474  0.0s
+ => => exporting manifest list sha256:fafa7468b6906a184db927697125c8730ff  0.0s
+ => => naming to docker.io/library/lab_docker-web:latest                   0.0s
+ => => unpacking to docker.io/library/lab_docker-web:latest                0.0s
+ => resolving provenance for metadata file                                 0.0s
+[+] up 5/5
+ ✔ Image lab_docker-web       Built                                         0.7s
+ ✔ Network lab_docker_default Created                                       0.1s
+ ✔ Volume lab_docker_db_data  Created                                       0.0s
+ ✔ Container mysql_db         Created                                       0.2s
+ ✔ Container web_app          Created                                       0.1s
+Attaching to mysql_db, web_app
+Container mysql_db Waiting 
+mysql_db  | 2026-06-08 12:01:54+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.46-1.el9 started.
+mysql_db  | 2026-06-08 12:01:54+00:00 [Note] [Entrypoint]: Switching to dedicated user 'mysql'
+mysql_db  | 2026-06-08 12:01:54+00:00 [Note] [Entrypoint]: Entrypoint script for MySQL Server 8.0.46-1.el9 started.
+mysql_db  | 2026-06-08 12:01:55+00:00 [Note] [Entrypoint]: Initializing database files
+mysql_db  | 2026-06-08T12:01:55.077960Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db  | 2026-06-08T12:01:55.078059Z 0 [System] [MY-013169] [Server] /usr/sbin/mysqld (mysqld 8.0.46) initializing of server in progress as process 81
+mysql_db  | 2026-06-08T12:01:55.086710Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db  | 2026-06-08T12:01:55.786065Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db  | 2026-06-08T12:01:56.990100Z 6 [Warning] [MY-010453] [Server] root@localhost is created with an empty password ! Please consider switching off the --initialize-insecure option.
+mysql_db  | 2026-06-08 12:02:01+00:00 [Note] [Entrypoint]: Database files initialized
+mysql_db  | 2026-06-08 12:02:01+00:00 [Note] [Entrypoint]: Starting temporary server
+mysql_db  | 2026-06-08T12:02:01.470470Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db  | 2026-06-08T12:02:01.472569Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.46) starting as process 125
+mysql_db  | 2026-06-08T12:02:01.491604Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db  | 2026-06-08T12:02:05.841009Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db  | 2026-06-08T12:02:06.054482Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+mysql_db  | 2026-06-08T12:02:06.054690Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+mysql_db  | 2026-06-08T12:02:06.060228Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+mysql_db  | 2026-06-08T12:02:06.088509Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Socket: /var/run/mysqld/mysqlx.sock
+mysql_db  | 2026-06-08T12:02:06.089183Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.46'  socket: '/var/run/mysqld/mysqld.sock'  port: 0  MySQL Community Server - GPL.
+mysql_db  | 2026-06-08 12:02:06+00:00 [Note] [Entrypoint]: Temporary server started.
+mysql_db  | '/var/lib/mysql/mysql.sock' -> '/var/run/mysqld/mysqld.sock'
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/iso3166.tab' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/leap-seconds.list' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/leapseconds' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/tzdata.zi' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/zone.tab' as time zone. Skipping it.
+mysql_db  | Warning: Unable to load '/usr/share/zoneinfo/zone1970.tab' as time zone. Skipping it.
+mysql_db  | 2026-06-08 12:02:08+00:00 [Note] [Entrypoint]: Creating database mydb
+mysql_db  | 2026-06-08 12:02:08+00:00 [Note] [Entrypoint]: Creating user user
+mysql_db  | 2026-06-08 12:02:08+00:00 [Note] [Entrypoint]: Giving user user access to schema mydb
+mysql_db  | 
+mysql_db  | 2026-06-08 12:02:09+00:00 [Note] [Entrypoint]: /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/init.sql
+mysql_db  | 
+mysql_db  | 
+mysql_db  | 2026-06-08 12:02:09+00:00 [Note] [Entrypoint]: Stopping temporary server
+mysql_db  | 2026-06-08T12:02:09.097759Z 14 [System] [MY-013172] [Server] Received SHUTDOWN from user root. Shutting down mysqld (Version: 8.0.46).
+mysql_db  | 2026-06-08T12:02:11.049830Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.0.46)  MySQL Community Server - GPL.
+mysql_db  | 2026-06-08 12:02:11+00:00 [Note] [Entrypoint]: Temporary server stopped
+mysql_db  | 
+mysql_db  | 2026-06-08 12:02:11+00:00 [Note] [Entrypoint]: MySQL init process done. Ready for start up.
+mysql_db  | 
+mysql_db  | 2026-06-08T12:02:11.317634Z 0 [Warning] [MY-011068] [Server] The syntax '--skip-host-cache' is deprecated and will be removed in a future release. Please use SET GLOBAL host_cache_size=0 instead.
+mysql_db  | 2026-06-08T12:02:11.318785Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.0.46) starting as process 1
+mysql_db  | 2026-06-08T12:02:11.338177Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+mysql_db  | 2026-06-08T12:02:13.709438Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+mysql_db  | 2026-06-08T12:02:13.856760Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+mysql_db  | 2026-06-08T12:02:13.856789Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+mysql_db  | 2026-06-08T12:02:13.861841Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+mysql_db  | 2026-06-08T12:02:13.887082Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.46'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+mysql_db  | 2026-06-08T12:02:13.887090Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
+Container mysql_db Healthy 
+web_app   |  * Serving Flask app 'app'
+web_app   |  * Debug mode: off
+web_app   | WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+web_app   |  * Running on all addresses (0.0.0.0)
+web_app   |  * Running on http://127.0.0.1:5000
+web_app   |  * Running on http://172.18.0.3:5000
+web_app   | Press CTRL+C to quit
+Gracefully Stopping... press Ctrl+C again to force
+Container web_app Stopping 
+Container web_app Stopped 
+Container mysql_db Stopping 
+web_app exited with code 137
+mysql_db  | 2026-06-08T12:03:34.999340Z 0 [System] [MY-013172] [Server] Received SHUTDOWN from user <via user signal>. Shutting down mysqld (Version: 8.0.46).
+mysql_db  | 2026-06-08T12:03:37.258051Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.0.46)  MySQL Community Server - GPL.
+Container mysql_db Stopped 
+mysql_db exited with code 0
+```
+Всё работает исправно и завершилось без ошибок
+![[Pasted image 20260608151435.png]]
+
+Отправляем на гитхаб
+```sh
+cd ~/projects/lab_docker && \
+git add app/ db/ Dockerfile docker-compose.yml && \
+git commit -m "Домашнее задание: веб-приложение с Flask и MySQL в Docker" && \
+git push origin main
+```
+
+```sh
+[main f126393] Домашнее задание: веб-приложение с Flask и MySQL в Docker
+ 7 files changed, 84 insertions(+), 18 deletions(-)
+ create mode 100644 app/app.py
+ create mode 100644 app/models.py
+ create mode 100644 app/requirements.txt
+ create mode 100644 app/templates/index.html
+ create mode 100644 db/init.sql
+Username for 'https://github.com': denismalyi2204-glitch
+Password for 'https://denismalyi2204-glitch@github.com': 
+Enumerating objects: 15, done.
+Counting objects: 100% (15/15), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (9/9), done.
+Writing objects: 100% (12/12), 2.18 KiB | 2.18 MiB/s, done.
+Total 12 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/denismalyi2204-glitch/lab_docker
+   cc0cbfd..f126393  main -> main
 ```
