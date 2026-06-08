@@ -764,7 +764,8 @@ Container mysql_db Stopped
 mysql_db exited with code 0
 ```
 Всё работает исправно и завершилось без ошибок
-![[Pasted image 20260608151435.png]]
+<img width="2729" height="1503" alt="image" src="https://github.com/user-attachments/assets/996da62a-fa14-4655-8b4e-0d4201d958fc" />
+
 
 Отправляем на гитхаб
 ```sh
